@@ -51,6 +51,7 @@ module packager (
     wire   start_forwarding; 
     reg    stop_forwarding;
     reg    stop_forwarding_d;
+    reg    stop_forwarding_d2;
     wire   reset; 
     reg    t_last_count_en;
     reg    [31:0] t_last_count_reg;
@@ -111,7 +112,7 @@ module packager (
                 end 
                  
             
-                if(video_valid & start_frame_reg & !(stop_forwarding_d))begin              
+                if(valid_reg_d & start_frame_reg & !(stop_forwarding_d2))begin   // Every line was 1 byte missing fixed with valid_reg_d in if block!           
                 m_valid_reg <= valid_reg_d;
                 m_tdata_reg <= data_reg_d;
              
@@ -119,7 +120,7 @@ module packager (
                 else begin
                 m_valid_reg <= 1'b0;
                 m_tdata_reg <= 8'b0;
-               
+                
                 
                 end
             end
@@ -142,9 +143,11 @@ module packager (
         stop_forwarding <= 1'b0;
         master_tlast <= 1'b0;
         stop_forwarding_d <= 1'b0;
+        stop_forwarding_d2 <= 1'b0; //this has been added to eliminate stream finishing one clock earlier.
         end
         else begin  
         stop_forwarding_d <= stop_forwarding; 
+        stop_forwarding_d2 <= stop_forwarding_d;
              if(video_tlast & t_last_count_en) begin       
                     
                   if(t_last_count >= line_count) begin
